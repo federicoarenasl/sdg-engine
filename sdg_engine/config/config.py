@@ -14,7 +14,7 @@ class SceneConfig(BaseModel):
     scene_path: str
     camera_names: List[str]
     axis_names: List[str]
-    element_names: List[str]
+    element_mapping: Dict[str, int]
     light_names: List[str]
 
 

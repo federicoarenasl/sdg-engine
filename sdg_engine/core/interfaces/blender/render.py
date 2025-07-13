@@ -8,7 +8,7 @@ from sdg_engine.core.model import Dataset, Annotation, SnapshotAnnotation
 
 import bpy
 from tqdm import tqdm
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 import uuid
 import warnings
 import numpy as np
@@ -70,12 +70,19 @@ class BlenderRenderer:
 
     def annotate_snapshot(
         self,
+        element_mapping: Dict[str, int],
         cameras: List[BlenderElement],
         elements: List[BlenderElement],
         snapshot_id: uuid.UUID,
         relative: bool = True,
     ) -> Annotation:
-        """Create bounding boxes for the elements in the scene."""
+        """Create bounding boxes for the elements in the scene.
+
+        Parameters:
+        ___________
+        element_mapping: Dict[str, int]
+            The mapping of element names to their indices.
+        """
         if len(cameras) > 1:
             warnings.warn(
                 "Multiple cameras are not supported yet. Only the first camera will be used."
@@ -99,7 +106,7 @@ class BlenderRenderer:
                 continue
 
             annotation.objects.bbox.append(bounding_box.tolist())
-            annotation.objects.categories.append(i)
+            annotation.objects.categories.append(element_mapping[element.name])
 
         return annotation
 
@@ -130,6 +137,7 @@ def generate_dataset_from_config(config: RenderingConfig) -> Dataset:
         renderer.render_snapshot(snapshot_id=snapshot.id)
         # Create bounding boxes
         annotation: Annotation = renderer.annotate_snapshot(
+            element_mapping=config.scene_config.element_mapping,
             cameras=scene.cameras,
             elements=scene.elements,
             snapshot_id=snapshot.id,

@@ -51,7 +51,7 @@ class BlenderScene(Scene):
         attr_to_names = {
             "cameras": scene_config.camera_names,
             "axis": scene_config.axis_names,
-            "elements": scene_config.element_names,
+            "elements": list(scene_config.element_mapping.keys()),
             "lights": scene_config.light_names,
         }
         # Initialize and populate the attributes
