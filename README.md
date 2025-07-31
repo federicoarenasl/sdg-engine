@@ -1,5 +1,4 @@
 # sdg-engine: a simple data generation engine for computer vision
-_If you are looking for the old version of `sdg-engine` I've stored it in [this branch](https://github.com/federicoarenasl/sdg-engine/tree/deprecated-main), the tutorial can be found [here](https://federicoarenasl.github.io/sdg-engine/)._
 
 A simple interface for synthetic data generation for computer vision using rendering engines.
 
@@ -28,48 +27,57 @@ source .venv/bin/activate
 > Note: Currently Blender's `bpy` package is included as part of the dependencies. Depending on your internet speed, this will take a short while.
 
 ## Running `sdg_engine` using Blender
-In order for `sdg_engine` to remain minimal while illustrative for you to generate your own synthetic datasets, I've included a functional example that you can replicate which generates data replicating the open-source TYO-L dataset.
+In order for `sdg_engine` to remain minimal while illustrative for you to generate your own synthetic datasets, I've included a functional example.
 
 You can also use your own scenes by following the instructions below.
 ### From the example included
 This is composed of two files:
-- [`tyless-5-objects.blend`](sdg_engine/core/interfaces/blender/scenes/tyless-5-objects.blend): This is the actual Blender `.blend` scene.
-- [`example.config.yaml`](sdg_engine/example.config.yaml): This is the configuration for that indicates `sdg_engine` which `.blend` scene to use, where to save the data, and how to perform a sweep over the scene in order to generate meaningful data.
+- [`gelatina.blend`](gelatina.blend): This is the actual Blender `.blend` scene.
+- [`config.yaml`](config.yaml): This is the configuration for that indicates `sdg_engine` which `.blend` scene to use, where to save the data, and how to perform a sweep over the scene in order to generate meaningful data.
 
-Copy and paste `example.config.yaml` into your own `config.yaml`.
 
 ### From your own example
 You'll have to follow some conventions I've setup to make the actual setup super easy.
 
 Open Blender (if you haven't installed it yet, you can do so [here](https://www.blender.org/download/)) and:
-1. Copy and paste the example [`tyless-5-objects.blend`](sdg_engine/core/interfaces/blender/scenes/tyless-5-objects.blend). Rename it to a name of your liking.
-2. In your new scene, make sure to name your objects with easily identifiable names.
+1. Edit the scene [`gelatina.blend`] with the objects that you want to generate and other customizations. 
+2. In your new scene, make sure to name your objects with easily identifiable names. Don`t forget to put the exact names of the objects in the yaml.
 3. Spend as much time as you would like styling your scene to your liking.
 4. Keep the camera and axis as they are in the example scene, **do not delete nor move these**.
 
-Finally, update the configuration YAML `sdg_engine` will use to generate data:
-1. Copying and pasting the `example.config.yaml` into your own `config.yaml`, replace `scene_path` with the path to your new `.blend` file.
+Update the configuration YAML  will use to generate data:
+1. Using the `config.yaml`, replace `scene_path` with the path to your new `.blend` file.
 2. Update the `scene_name` to the name of the scene in your `.blend` file.
 3. Update the `element_names` to the names of the objects in your scene.
 4. Update the `target_path` to the path where you want to save the data.
+5. Finally, put in the 'background' folder path which contains the backgrounds that you want to generate the data with
 
 ### Generating the dataset
 Once you have your scene set up, you can generate data by running:
 ```bash
-poetry run python -m sdg_engine.core.main --config config.yaml
+poetry run python -m sdg_engine.main --config config.yaml
 ```
 
 This will produce a dataset with the following structure in your `target_path`:
 ```bash
 .
 └── train # or validation or test, depending on the split in the config
-    ├── 1ed8d595-fb93-4d7b-87bc-d060a66a0b66_annotated.png
-    ├── 1ed8d595-fb93-4d7b-87bc-d060a66a0b66.png
-    ├── 4a283977-67aa-4485-aefe-4fcbf3a74731_annotated.png
-    ...
-    ├── f3b8cc29-de80-4b52-961c-a00ec237767c_annotated.png
-    ├── f3b8cc29-de80-4b52-961c-a00ec237767c.png
-    ├── annotation_animation.gif
+    ├── images
+      ├── 1ed8d595-fb93-4d7b-87bc-d060a66a0b66_annotated.png
+      ├── 1ed8d595-fb93-4d7b-87bc-d060a66a0b66.png
+      ├── 4a283977-67aa-4485-aefe-4fcbf3a74731_annotated.png
+      ...
+      ├── f3b8cc29-de80-4b52-961c-a00ec237767c_annotated.png
+      ├── f3b8cc29-de80-4b52-961c-a00ec237767c.png
+      ├── annotation_animation.gif
+      
+    └── labels
+        ├── 1ed8d595-fb93-4d7b-87bc-d060a66a0b66_annotated.txt
+      ├── 1ed8d595-fb93-4d7b-87bc-d060a66a0b66.txt
+      ├── 4a283977-67aa-4485-aefe-4fcbf3a74731_annotated.txt
+      ...
+      ├── f3b8cc29-de80-4b52-961c-a00ec237767c_annotated.txt
+      ├── f3b8cc29-de80-4b52-961c-a00ec237767c.txt
     └── metadata.jsonl
 ```
 
@@ -87,6 +95,14 @@ below for the `example.config.yaml` configuration.
   <i>Animation of the annotated images generated with the example configuration.</i>
 </p>
 
+
+## Training Yolo with the dataset generated
+
+To train the yolo with the dataset generated you need to:
+1. Put a test folder with images the same size as the images in the train folder
+2. Edit the config_yolo.yaml and train.py file with the yolo configs that you want
+3. Run the training with:
+            poetry run train.py
 
 ## Pushing your dataset to the 🤗 Hub
 

@@ -9,12 +9,6 @@ def generate_dataset(config: RenderingConfig):
     if config.engine != SupportedEngines.BLENDER:
         raise ValueError(f"Unsupported engine: {config.engine}")
 
-    # Check if the target path exists
-    if os.path.exists(config.target_path):
-        raise ValueError(
-            f"The target path {config.target_path} already exists. Skipping dataset generation."
-        )
-
     # Import the renderer and generate the dataset
     import sdg_engine.core.interfaces.blender.render as renderer
 

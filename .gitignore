@@ -36,3 +36,13 @@ poetry.lock
 
 # Data
 dataset/
+dataset_360
+dataset_maior
+datasets_test/
+other_backgrounds
+.vscode
+datasets_fanta
+models
+processed_single_object_dataset
+base_dataset.yolov8
+runs

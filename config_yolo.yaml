@@ -1,0 +1,8 @@
+path: base_dataset.yolov8 # absolute path to dataset
+test: test/images # relative path to test images
+train: train/images # relative path to training images
+val: valid/images # relative path to validation images
+
+# classes
+names: ['apple', 'chocolate', 'cloth', 'cononut_water', 'detergent', 'fanta', 'gelatin', 'kuat', 'mustard', 'nescau', 'peanut', 'pear', 'sauce', 'shoyo', 'sponge', 'tangerine', 'tea', 'treloso']
+

@@ -12,6 +12,7 @@ class SupportedEngines(str, Enum):
 class SceneConfig(BaseModel):
     scene_name: str
     scene_path: str
+    background_images_folder_path: str
     camera_names: List[str]
     axis_names: List[str]
     element_names: List[str]

@@ -1,0 +1,34 @@
+# General settings
+engine: blender
+target_path: datasets_fanta
+debug: true # Whether to draw the bounding boxes on the images
+split: train # choose between 'train', 'validation', 'test'
+
+# Camera settings
+random_seed: 0
+resolution: [640, 640]
+samples: 15
+
+# Scene settings
+scene_config:
+  scene_path: gelatina.blend
+  scene_name: Scene
+  background_images_folder_path: background
+  camera_names:
+    - Camera
+  axis_names:
+    - Axis
+  element_names:
+    - obj_01
+  light_names:
+    - Light
+
+# Sweep settings
+sweep_config:
+    name: example_sweep
+    step: 90
+    yaw_limits: [-90.0, 90.0]
+    roll_limits: [-90.0, 90.0]
+    camera_height_limits: [3.5, 3.5]
+    light_energy_limits: [1000.0, 1000.0]
+    

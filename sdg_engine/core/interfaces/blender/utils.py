@@ -226,14 +226,15 @@ def draw_bounding_box_with_category(
     except IOError:
         font = ImageFont.load_default()
 
-    # Draw debugging rectangle, and Annotation JSON inside it
-    draw.text((0, 0), "(0, 0)", fill="white", font=font)
-    draw.text(
-        (0, 30),
-        f"Snapshot: {snapshot.model_dump_json(indent=4)}",
-        fill="white",
-        font=font,
-    )
+    # --- LINHAS REMOVIDAS/COMENTADAS PARA NÃO DESENHAR A INFO DO SNAPSHOT ---
+    # draw.text((0, 0), "(0, 0)", fill="white", font=font)
+    # draw.text(
+    #     (0, 30),
+    #     f"Snapshot: {snapshot.model_dump_json(indent=4)}",
+    #     fill="white",
+    #     font=font,
+    # )
+    # --- FIM DAS LINHAS REMOVIDAS/COMENTADAS ---
 
     # Draw each bounding box and category label
     for bbox, category in zip(bboxes, categories):
@@ -248,10 +249,22 @@ def draw_bounding_box_with_category(
 
         # Draw the category label
         label = f"{category}, ({top_x:.2f}, {top_y:.2f})"
-        text_size = draw.textbbox((0, 0), label, font=font)[2:]
-        text_background = [top_x, top_y - text_size[1], top_x + text_size[0], top_y]
-        draw.rectangle(text_background, fill="red")
-        draw.text((top_x, top_y - text_size[1]), label, fill="white", font=font)
+        # Ajuste a posição do fundo do texto para garantir que ele não fique "escondido"
+        text_size = draw.textbbox((0, 0), label, font=font)[2:] # width, height of text
+        
+        # Posiciona o fundo do texto acima da bounding box, alinhado à esquerda
+        text_background_x0 = top_x
+        text_background_y0 = top_y - text_size[1] # 'text_size[1]' é a altura do texto
+        text_background_x1 = top_x + text_size[0]
+        text_background_y1 = top_y
+        
+        # Certifica-se de que o fundo do texto não saia da imagem pela parte superior
+        if text_background_y0 < 0:
+            text_background_y0 = 0
+            text_background_y1 = text_size[1]
+        
+        draw.rectangle([text_background_x0, text_background_y0, text_background_x1, text_background_y1], fill="red")
+        draw.text((text_background_x0, text_background_y0), label, fill="white", font=font)
 
     # Save the image to the same path but with the suffix "_annotated"
     image.save(
@@ -281,13 +294,16 @@ def render_annotation_animation(target_path: str, dataset: Dataset) -> None:
     
     # Save as GIF
     output_path = f"{target_path}/annotation_animation.gif"
-    images[0].save(
-        output_path,
-        save_all=True,
-        append_images=images[1:],
-        duration=500,  # 500ms per frame
-        loop=0  # Loop indefinitely
-    )
+    if images: # Garante que há imagens para salvar
+        images[0].save(
+            output_path,
+            save_all=True,
+            append_images=images[1:],
+            duration=500,  # 500ms per frame
+            loop=0  # Loop indefinitely
+        )
+    else:
+        warnings.warn(f"Nenhuma imagem anotada encontrada em '{target_path}' para criar a animação GIF.")
     
     # Close all images
     for img in images:
