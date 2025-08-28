@@ -81,7 +81,7 @@ The animation GIF is super helpful to visualize the data you've just generated, 
 below for the `example.config.yaml` configuration.
 
 <p align="center">
-  <img src="examples/annotation_animation.gif" width="350" />
+  <img src="tutorials/annotation_animation.gif" width="350" />
 </p>
 <p align="center">
   <i>Animation of the annotated images generated with the example configuration.</i>
