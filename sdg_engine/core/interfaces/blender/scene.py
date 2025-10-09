@@ -34,7 +34,7 @@ class BlenderScene(Scene):
 
         # Prepare axis, camera and light
         self.axis[0].set_location(location=(0, 0, 0))
-        self.axis[0].set_rotation(rotation=(snapshot.yaw, snapshot.roll, 0))
+        self.axis[0].set_rotation(rotation=(snapshot.roll, 0, snapshot.yaw))
         self.cameras[0].set_location(location=(0, 0, snapshot.camera_height))
         self.lights[0].set_energy(energy=snapshot.light_energy)
 

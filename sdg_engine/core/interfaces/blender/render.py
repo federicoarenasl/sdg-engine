@@ -14,6 +14,7 @@ import warnings
 import numpy as np
 
 METADATA_FILENAME = "metadata.jsonl"
+CONSTANT_BBOX_ID = 1000
 
 class BlenderRenderer:
     """Interface for Blender rendering."""
@@ -70,18 +71,38 @@ class BlenderRenderer:
 
     def annotate_snapshot(
         self,
+        idx: int,
+        width: int,
+        height: int,
         element_mapping: Dict[str, int],
         cameras: List[BlenderElement],
         elements: List[BlenderElement],
         snapshot_id: uuid.UUID,
         relative: bool = True,
+        check_visibility: bool = False,
     ) -> Annotation:
         """Create bounding boxes for the elements in the scene.
 
         Parameters:
         ___________
+        idx: int
+            The index of the snapshot.
+        width: int
+            The width of the snapshot.
+        height: int
+            The height of the snapshot.
         element_mapping: Dict[str, int]
             The mapping of element names to their indices.
+        cameras: List[BlenderElement]
+            The cameras in the scene.
+        elements: List[BlenderElement]
+            The elements in the scene.
+        snapshot_id: uuid.UUID
+            The ID of the snapshot.
+        relative: bool
+            Whether to use relative coordinates.
+        check_visibility: bool
+            Whether to only include visible vertices (not occluded by other objects).
         """
         if len(cameras) > 1:
             warnings.warn(
@@ -91,21 +112,34 @@ class BlenderRenderer:
 
         annotation = Annotation(
             file_name=f"{snapshot_id}.png",
-            objects=SnapshotAnnotation(bbox=[], categories=[]),
+            image_id=idx,
+            width=width,
+            height=height,
+            objects=SnapshotAnnotation(bbox=[], categories=[], bbox_ids=[], areas=[]),
         )
 
         for i, element in enumerate(elements):
+            # Create bounding box from casting a ray from the camera to the element
             bounding_box: np.ndarray = utils.create_bounding_box(
                 scene=self.scene,
                 camera=camera,
                 element=element,
                 relative=relative,
                 resolution=self.resolution,
+                check_visibility=check_visibility,
             )
             if bounding_box is None:
                 continue
 
+            # Create unique bbox ID: image_index * 1000 + bbox_index_within_image,
+            # as well as the area of the bounding box (width * height)
+            bbox_id = idx * CONSTANT_BBOX_ID + i
+            bbox_area = bounding_box[2] * bounding_box[3]
+
+            # Append the bounding box, bbox ID, area, and category to the annotation
             annotation.objects.bbox.append(bounding_box.tolist())
+            annotation.objects.bbox_ids.append(bbox_id)
+            annotation.objects.areas.append(bbox_area)
             annotation.objects.categories.append(element_mapping[element.name])
 
         return annotation
@@ -130,17 +164,21 @@ def generate_dataset_from_config(config: RenderingConfig) -> Dataset:
     dataset: Dataset = Dataset(path=split_path, annotations=[])
 
     # Collect the dataset annotations
-    for snapshot in tqdm(sweep.snapshots, desc="Rendering snapshots"):
+    for idx, snapshot in tqdm(enumerate(sweep.snapshots), desc="Rendering snapshots", total=len(sweep.snapshots)):
         # Prepare axis, camera and light
         scene.prepare_from_snapshot(snapshot=snapshot)
         # Render the snapshot, and create bounding boxes
         renderer.render_snapshot(snapshot_id=snapshot.id)
         # Create bounding boxes
         annotation: Annotation = renderer.annotate_snapshot(
+            idx=idx,
+            width=renderer.resolution[0],
+            height=renderer.resolution[1],
             element_mapping=config.scene_config.element_mapping,
             cameras=scene.cameras,
             elements=scene.elements,
             snapshot_id=snapshot.id,
+            check_visibility=config.check_visibility,
         )
         if config.debug:
             utils.draw_bounding_box_with_category(

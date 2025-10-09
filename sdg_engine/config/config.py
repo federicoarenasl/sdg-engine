@@ -19,8 +19,14 @@ class SceneConfig(BaseModel):
 
 
 class SweepConfig(BaseModel):
+    """Configuration for parameter sweeps.
+    
+    The 'step' parameter defines how many intervals to divide each parameter range into,
+    ensuring proportional sampling across all parameters regardless of their scale.
+    For example, step=8 will create 9 values (8 intervals + endpoints) for each parameter.
+    """
     name: str
-    step: int
+    step: int  # Number of intervals to divide each parameter range into
     yaw_limits: Tuple[float, float]
     roll_limits: Tuple[float, float]
     camera_height_limits: Tuple[float, float]
@@ -37,6 +43,7 @@ class RenderingConfig(BaseModel):
     scene_config: SceneConfig
     sweep_config: SweepConfig
     debug: bool = False
+    check_visibility: bool = False
 
 
 def config_from_yaml(yaml_config: Dict) -> RenderingConfig:
