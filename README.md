@@ -105,9 +105,9 @@ I've included an example notebook in the `examples` folder to push the dataset t
 I've created a two part tutorial for training a Vision Transformer with data generated using
 the `sdg-engine` package, you can follow them here:
 
-- [Fine-tune a Vision Transformer on Synthetic Data, Part 1: Generate the training data using Blender
+- [Fine-tune DETR on Synthetic Data, Part 1: Generate the training data using Blender
 ](https://www.federicoarenas.ai/projects/fine-tune-detr-1): walks you through using `sdg-engine` for generating synthetic data to fine-tune a Vision Transformer for object detection.
-- [Fine-tune a Vision Transformer on Synthetic Data, Part 2: Fine-tune and Evaluate your model
+- [Fine-tune DETR on Synthetic Data, Part 2: Fine-tune and Evaluate your model
 ](https://www.federicoarenas.ai/projects/fine-tune-detr-2): walks you through using the HuggingFace `transformers` library for training and evaluating a Vision Transformer for object detection.
 
 
