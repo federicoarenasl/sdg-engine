@@ -56,7 +56,7 @@ Finally, update the configuration YAML `sdg_engine` will use to generate data:
 ### Generating the dataset
 Once you have your scene set up, you can generate data by running:
 ```bash
-poetry run python -m sdg_engine.main --config sdg_engine/config.yaml
+poetry run python -m sdg_engine.main --config example.config.yaml
 ```
 
 This will produce a dataset with the following structure in your `target_path`:
@@ -81,7 +81,7 @@ The animation GIF is super helpful to visualize the data you've just generated, 
 below for the `example.config.yaml` configuration.
 
 <p align="center">
-  <img src="tutorials/annotation_animation.gif" width="350" />
+  <img src="https://github.com/federicoarenasl/sdg-engine/blob/main/examples/annotation_animation.gif" width="350" />
 </p>
 <p align="center">
   <i>Animation of the annotated images generated with the example configuration.</i>
