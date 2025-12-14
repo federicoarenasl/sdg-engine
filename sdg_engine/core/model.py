@@ -45,6 +45,8 @@ class SnapshotAnnotation(BaseModel):
     """Base data class for all object annotations in a sweep."""
 
     bbox: List[List[float]]
+    bbox_ids: List[int]
+    areas: List[float]
     categories: List[int]
 
 
@@ -52,6 +54,9 @@ class Annotation(BaseModel):
     """Base data class for all annotations in a sweep."""
 
     file_name: str
+    image_id: int
+    width: int
+    height: int
     objects: SnapshotAnnotation
 
 

@@ -1,0 +1,42 @@
+# General settings
+engine: blender
+target_path: synthetic-bop-homebrew-scene-3-small
+debug: false # Whether to draw the bounding boxes on the images
+split: train # choose between 'train', 'validation', 'test'
+check_visibility: true # Only include visible parts of objects (not occluded)
+
+# Camera settings
+random_seed: 0
+resolution: [640, 480]
+samples: 25
+
+# Scene settings
+scene_config:
+  scene_path: sdg_engine/core/interfaces/blender/scenes/synthetic-bop-homebrew-scene-3.blend
+  scene_name: Scene
+  camera_names:
+    - Camera
+  axis_names:
+    - Axis
+  light_names:
+    - Light
+  # Mapping of element names to their category index
+  element_mapping:
+    obj_00: 0
+    obj_01: 1
+    obj_02: 2
+    obj_03: 3
+
+# Sweep settings
+sweep_config:
+    name: example_sweep
+    step: 18  # Number of intervals per parameter range (creates 9 values each)
+             # yaw: -180 to 180 → 9 values with 45° increments
+             # roll: -85 to 85 → 9 values with ~21.25° increments  
+             # camera_height: 1.0 to 2.0 → 9 values with 0.125 increments
+             # light_energy: 1000 to 5000 → 9 values with 500 increments
+    yaw_limits: [-180.0, 180.0]
+    roll_limits: [-85.0, 85.0]
+    camera_height_limits: [1.5, 1.5]
+    light_energy_limits: [50, 50]
+    

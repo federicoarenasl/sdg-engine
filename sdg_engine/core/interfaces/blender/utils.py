@@ -16,6 +16,7 @@ def create_bounding_box(
     element: BlenderElement,
     relative: bool = True,
     resolution: Optional[Tuple[int, int]] = None,
+    check_visibility: bool = False,
 ) -> Optional[np.ndarray]:
     """Create bounding boxes for the elements in the scene.
 
@@ -31,12 +32,19 @@ def create_bounding_box(
         Whether to return the bounding box in relative coordinates.
     resolution: Optional[Tuple[int, int]]
         The resolution to normalize the bounding box to.
+    check_visibility: bool
+        Whether to only include visible vertices (not occluded by other objects).
 
     Returns:
     --------
     Optional[np.ndarray]
         The bounding boxes for the elements in the scene, or None if not in view.
     """
+    if check_visibility:
+        return create_visible_bounding_box(
+            scene, camera, element, relative, resolution
+        )
+    
     # Prepare transformation matrix from camera to object
     inverse_matrix = camera.get_matrix(inverse=True, normalized=True)
     mesh = element.get_mesh(preserve_all_data_layers=True)
@@ -54,6 +62,101 @@ def create_bounding_box(
     # in the camera's coordinate space
     lx, ly = calculate_normalized_coordinates(mesh, frame)
 
+    # Finally, compute the bounding box from the 2D coordinates
+    return compute_bounding_box(lx, ly, relative=relative, resolution=resolution)
+
+
+def create_visible_bounding_box(
+    scene: BlenderScene,
+    camera: BlenderElement,
+    element: BlenderElement,
+    relative: bool = True,
+    resolution: Optional[Tuple[int, int]] = None,
+) -> Optional[np.ndarray]:
+    """Create bounding boxes for only the visible parts of elements in the scene.
+    
+    This function uses ray casting to determine which vertices are actually visible
+    from the camera's perspective, accounting for occlusion by other objects.
+
+    Parameters:
+    -----------
+    scene: BlenderScene
+        The scene to create bounding boxes for.
+    camera: BlenderElement
+        The camera to create bounding boxes for.
+    element: BlenderElement
+        The element to create bounding boxes for.
+    relative: bool
+        Whether to return the bounding box in relative coordinates.
+    resolution: Optional[Tuple[int, int]]
+        The resolution to normalize the bounding box to.
+
+    Returns:
+    --------
+    Optional[np.ndarray]
+        The bounding boxes for only visible parts of the elements, or None if not visible.
+    """
+    # Get the depsgraph for ray casting
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    
+    # Get mesh and prepare transformations
+    mesh = element.get_mesh(preserve_all_data_layers=True)
+    element_matrix = element.get_matrix()
+    camera_location = camera.object.matrix_world.translation
+    
+    # Find visible vertices using ray casting
+    visible_vertices = []
+    
+    for vertex in mesh.vertices:
+        # Transform vertex to world coordinates
+        world_vertex = element_matrix @ vertex.co
+        
+        # Cast ray from camera to vertex
+        direction = (world_vertex - camera_location).normalized()
+        ray_distance = (world_vertex - camera_location).length
+        
+        # Perform ray cast
+        result, location, normal, index, hit_object, matrix = scene.blender_scene.ray_cast(
+            depsgraph, camera_location, direction, distance=ray_distance + 0.001
+        )
+        
+        # Check if the ray hit our target object first (not occluded)
+        if result and hit_object == element.object:
+            # Check if the hit location is close to our vertex
+            distance_to_vertex = (location - world_vertex).length
+            if distance_to_vertex < 0.01:  # Small tolerance for floating point errors
+                visible_vertices.append(vertex)
+        elif not result:
+            # No hit means the vertex is visible (nothing blocking it)
+            visible_vertices.append(vertex)
+    
+    if not visible_vertices:
+        return None
+    
+    # Now process visible vertices similar to the original function
+    inverse_matrix = camera.get_matrix(inverse=True, normalized=True)
+    
+    # Create a temporary mesh with only visible vertices
+    visible_mesh = bpy.data.meshes.new("temp_visible_mesh")
+    visible_mesh.from_pydata(
+        [vertex.co for vertex in visible_vertices], 
+        [], 
+        []
+    )
+    
+    # Apply transformations
+    visible_mesh.transform(element_matrix)
+    visible_mesh.transform(inverse_matrix)
+    
+    # Prepare camera frame 3D coordinates
+    frame = [-v for v in camera.object.data.view_frame(scene=scene.blender_scene)[:3]]
+    
+    # Calculate normalized coordinates for visible vertices
+    lx, ly = calculate_normalized_coordinates(visible_mesh, frame)
+    
+    # Clean up temporary mesh
+    bpy.data.meshes.remove(visible_mesh)
+    
     # Finally, compute the bounding box from the 2D coordinates
     return compute_bounding_box(lx, ly, relative=relative, resolution=resolution)
 
