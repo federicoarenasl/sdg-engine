@@ -102,10 +102,16 @@ I've included an example notebook in the `examples` folder to push the dataset t
 
 
 ## Tutorials
-There will be a tutorial on how to use the generated dataset in a downstream Computer Vision task using 🤗 Transformers and 🤗 Datasets in my website [federicoarenas.ai](https://federicoarenas.ai).
+I've created a two part tutorial for training a Vision Transformer with data generated using
+the `sdg-engine` package, you can follow them here:
 
-Stay tuned for the tutorial at [federicoarenas.ai/projects/sdg-engine-applied](https://federicoarenas.ai/projects/sdg-engine-applied)
+- [Train a Vision Transformer on Synthetic Data, Part 1: Generate the data using Blender
+](https://www.federicoarenas.ai/projects/train-detr-on-synthetic-data-1): walks you through using `sdg-engine` for generating synthetic data to train a Vision Transformer for object detection.
+- [Train a Vision Transformer on Synthetic Data, Part 2: Train and Evaluate your model
+](https://www.federicoarenas.ai/projects/train-detr-on-synthetic-data-2): walks you through using the HuggingFace `transformers` library for training and evaluating a Vision Transformer for object detection.
 
+
+Please log any issues [here](https://github.com/federicoarenasl/sdg-engine/issues) you might find going through the tutorials above!
 
 ## Contributing
 
